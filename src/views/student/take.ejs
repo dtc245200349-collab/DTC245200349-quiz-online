@@ -1,0 +1,12 @@
+<%- include('../partials/head') %>
+<div class="page-heading"><div><span class="eyebrow">BÀI THI ĐANG DIỄN RA</span><h1><%= attempt.exam_title %></h1><p><%= answers.length %> câu hỏi · <%= attempt.duration_minutes %> phút · Chọn một phương án cho mỗi câu</p></div></div>
+<noscript><div class="alert alert-warning">JavaScript đang tắt: đồng hồ và tự lưu không hoạt động. Hãy bật JavaScript hoặc nộp bài trước <%= formatDate(attempt.expires_at) %>.</div></noscript>
+<form id="exam-form" action="/attempts/<%= attempt.id %>/submit" method="post" data-attempt-id="<%= attempt.id %>" data-expires-at="<%= attempt.expires_at.toISOString() %>" data-server-now="<%= serverNow.toISOString() %>">
+<input type="hidden" name="_csrf" value="<%= csrfToken %>">
+<div class="taking-grid"><div class="questions-list">
+<% for (const answer of answers) { %>
+  <fieldset class="question-card" id="question-<%= answer.position %>"><legend><span class="question-number">Câu <%= answer.position %></span><span class="question-text preserve"><%= answer.question_content %></span></legend><div class="options-list"><% for (const letter of ['A','B','C','D']) { %><label class="answer-option"><input type="radio" name="answers[a_<%= answer.id %>]" value="<%= letter %>" <%= answer.selected_option === letter ? 'checked' : '' %>><span class="option-letter"><%= letter %></span><span><%= answer['option_' + letter.toLowerCase()] %></span></label><% } %></div></fieldset>
+<% } %></div><aside class="exam-rail"><div class="panel timer-panel"><span class="eyebrow">THỜI GIAN CÒN LẠI</span><div id="countdown" class="countdown" role="timer" aria-label="Thời gian còn lại">--:--</div><p id="answered-count">Đã chọn 0/<%= answers.length %> câu</p><progress id="answer-progress" max="<%= answers.length %>" value="0" aria-label="Tiến độ làm bài"></progress><div class="question-nav"><% for (const a of answers) { %><a href="#question-<%= a.position %>" data-question-nav="<%= a.id %>" aria-label="Đến câu <%= a.position %>"><%= a.position %></a><% } %></div><p id="save-status" class="save-status" role="status">Đáp án sẽ được tự động lưu.</p><button class="btn btn-primary w-100" type="submit" id="submit-exam">Nộp bài</button><p class="rail-hint">Kiểm tra đáp án trước khi nộp. Bạn sẽ không thể sửa bài đã nộp.</p></div></aside></div>
+</form>
+<script src="/assets/js/exam.js" defer></script>
+<%- include('../partials/foot') %>

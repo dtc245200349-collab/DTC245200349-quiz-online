@@ -1,0 +1,36 @@
+{
+  "name": "quiz-online",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hệ thống thi trắc nghiệm trực tuyến – Express, EJS và MySQL",
+  "main": "src/server.js",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "db:init": "node scripts/init-db.js",
+    "db:seed": "node scripts/seed.js",
+    "setup:env": "node scripts/setup-env.js",
+    "test": "node --test tests/unit.test.js tests/views.test.js tests/proxy.test.js",
+    "test:integration": "node --test --test-concurrency=1 tests/integration.test.js",
+    "test:browser": "node scripts/browser-check.js",
+    "check": "node scripts/check.js",
+    "check:compose": "node scripts/verify-compose.js",
+    "test:deployment": "node scripts/test-deployment.js"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "bootstrap": "^5.3.8",
+    "dotenv": "^17.2.3",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.2.1",
+    "express-session": "^1.18.2",
+    "helmet": "^8.1.0",
+    "mysql2": "^3.15.3"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1",
+    "supertest": "^7.1.4"
+  }
+}

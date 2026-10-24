@@ -1,0 +1,22 @@
+<%- include('partials/head') %>
+<div class="auth-layout">
+  <section class="auth-intro">
+    <a class="brand brand-light" href="/login"><span class="brand-mark">Q<span>.</span></span><span>Quiz Online<small>HỌC TẬP & ĐÁNH GIÁ</small></span></a>
+    <div class="auth-message"><span class="eyebrow">KHÔNG GIAN HỌC TẬP CỦA BẠN</span><h1>Mỗi bài thi,<br>một bước tiến.</h1><p>Ôn tập kiến thức, thử sức với các đề thi và theo dõi tiến bộ của bạn qua từng kết quả.</p><div class="auth-feature"><span>01</span><div><strong>Chủ động làm bài</strong><p>Chọn đề thi và bắt đầu khi bạn sẵn sàng.</p></div></div><div class="auth-feature"><span>02</span><div><strong>Hiểu rõ kết quả</strong><p>Xem điểm, đáp án và giải thích sau khi nộp.</p></div></div></div>
+    <div class="auth-course">Triển khai và Quản trị Hệ thống Phần mềm</div>
+  </section>
+  <section class="auth-form-panel"><div class="auth-form-wrap"><span class="eyebrow text-primary">CHÀO MỪNG ĐẾN QUIZ ONLINE</span><h2><%= mode === 'login' ? 'Đăng nhập tài khoản' : 'Bắt đầu hành trình học tập' %></h2><p class="text-secondary mb-4"><%= mode === 'login' ? 'Đăng nhập để tiếp tục làm bài và xem kết quả.' : 'Tạo tài khoản sinh viên để tham gia các đề thi.' %></p>
+    <% if (error) { %><div class="alert alert-danger" role="alert"><%= error %></div><% } %>
+    <form method="post" action="/<%= mode %>">
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <% if (mode === 'register') { %><div class="mb-3"><label class="form-label" for="name">Họ và tên</label><input id="name" name="name" class="form-control" value="<%= values.name || '' %>" autocomplete="name" minlength="2" maxlength="100" required></div><% } %>
+      <div class="mb-3"><label class="form-label" for="email">Địa chỉ email</label><input id="email" name="email" type="email" class="form-control" value="<%= values.email || '' %>" placeholder="ban@example.com" autocomplete="email" maxlength="190" required></div>
+      <div class="mb-3"><label class="form-label" for="password">Mật khẩu</label><input id="password" name="password" type="password" class="form-control" autocomplete="<%= mode === 'login' ? 'current-password' : 'new-password' %>" minlength="8" maxlength="72" required><% if (mode === 'register') { %><div class="form-text">Ít nhất 8 ký tự, tối đa 72 byte UTF-8.</div><% } %></div>
+      <% if (mode === 'register') { %><div class="mb-4"><label class="form-label" for="confirm_password">Xác nhận mật khẩu</label><input id="confirm_password" name="confirm_password" type="password" class="form-control" autocomplete="new-password" minlength="8" maxlength="72" required></div><% } %>
+      <button type="submit" class="btn btn-primary w-100 mt-2"><%= mode === 'login' ? 'Đăng nhập' : 'Tạo tài khoản' %></button>
+    </form>
+    <p class="auth-switch"><%= mode === 'login' ? 'Bạn chưa có tài khoản?' : 'Bạn đã có tài khoản?' %> <a href="<%= mode === 'login' ? '/register' : '/login' %>"><%= mode === 'login' ? 'Đăng ký ngay' : 'Đăng nhập' %></a></p>
+    <p class="auth-note">Sinh viên và quản trị viên sử dụng cùng trang đăng nhập. Hệ thống sẽ mở đúng không gian của bạn.</p>
+  </div></section>
+</div>
+<%- include('partials/foot') %>

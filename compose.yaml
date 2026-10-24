@@ -1,0 +1,131 @@
+name: dtc245200349-quiz-online
+
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    mem_limit: 1024m
+    cpus: 1.0
+    command: ["mysqld", "--innodb-buffer-pool-size=128M", "--max-connections=50"]
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-quiz_online}
+      MYSQL_USER: ${DB_USER:-quiz_app}
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Run npm run setup:env first}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      TZ: UTC
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/10-schema.sql:ro
+      - ./deploy/mysql/20-app-permissions.sh:/docker-entrypoint-initdb.d/20-app-permissions.sh:ro
+    networks: [backend]
+    healthcheck:
+      test: ["CMD-SHELL", "MYSQL_PWD=\"$$MYSQL_PASSWORD\" mysql -h 127.0.0.1 -u\"$$MYSQL_USER\" -D\"$$MYSQL_DATABASE\" -e 'SELECT 1 FROM users LIMIT 1' >/dev/null 2>&1"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+    logging: *default-logging
+
+  app:
+    build: .
+    init: true
+    restart: unless-stopped
+    mem_limit: 384m
+    cpus: 1.0
+    environment:
+      NODE_ENV: production
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: ${DB_NAME:-quiz_online}
+      DB_USER: ${DB_USER:-quiz_app}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      SESSION_SECRET: ${SESSION_SECRET:?Set SESSION_SECRET in .env}
+      COOKIE_SECURE: ${COOKIE_SECURE:-false}
+      TRUST_PROXY: "1"
+      PORT: 3000
+      SEED_ADMIN_EMAIL: ${SEED_ADMIN_EMAIL:-admin@quiz.local}
+      SEED_ADMIN_PASSWORD: ${SEED_ADMIN_PASSWORD:?Set SEED_ADMIN_PASSWORD in .env}
+      SEED_STUDENT_EMAIL: ${SEED_STUDENT_EMAIL:-student@quiz.local}
+      SEED_STUDENT_PASSWORD: ${SEED_STUDENT_PASSWORD:?Set SEED_STUDENT_PASSWORD in .env}
+    networks: [backend]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    logging: *default-logging
+
+  nginx:
+    image: nginx:1.28-alpine
+    restart: unless-stopped
+    mem_limit: 128m
+    cpus: 0.5
+    ports:
+      - "127.0.0.1:${NGINX_PORT:-8080}:8080"
+    volumes:
+      - ./deploy/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks: [frontend, backend]
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    security_opt: [no-new-privileges:true]
+    logging: *default-logging
+
+  phpmyadmin:
+    image: phpmyadmin:5.2-apache
+    restart: unless-stopped
+    mem_limit: 256m
+    cpus: 0.5
+    ports:
+      - "127.0.0.1:${PHPMYADMIN_PORT:-8081}:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: "0"
+      UPLOAD_LIMIT: 16M
+    volumes:
+      - phpmyadmin_sessions:/sessions
+      - ./deploy/phpmyadmin/config.user.inc.php:/etc/phpmyadmin/config.user.inc.php:ro
+    networks: [admin_frontend, backend]
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1/robots.txt') === false ? 1 : 0);"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    security_opt: [no-new-privileges:true]
+    logging: *default-logging
+
+networks:
+  frontend:
+  admin_frontend:
+  backend:
+    internal: true
+
+volumes:
+  mysql_data:
+  phpmyadmin_sessions:

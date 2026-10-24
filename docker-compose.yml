@@ -1,0 +1,5 @@
+﻿# Compatibility entrypoint; compose.yaml is the single source of configuration.
+# Requires Docker Compose >= 2.20.3.
+name: dtc245200349-quiz-online
+include:
+  - compose.yaml

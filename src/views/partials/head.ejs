@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Quiz Online – Hệ thống thi trắc nghiệm trực tuyến">
+  <meta name="csrf-token" content="<%= csrfToken %>">
+  <title><%= title %> · Quiz Online</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/vendor/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/assets/css/app.css">
+  <script src="/assets/js/app.js" defer></script>
+</head>
+<body class="<%= user ? 'workspace' : 'auth-body' %>">
+<a class="skip-link" href="#main-content">Đến nội dung chính</a>
+<% if (user) { %>
+  <aside class="sidebar" id="sidebar">
+    <button type="button" class="sidebar-close btn btn-light" aria-label="Đóng trình đơn">×</button>
+    <a class="brand" href="<%= user.role === 'admin' ? '/admin' : '/exams' %>"><span class="brand-mark">Q<span>.</span></span><span>Quiz Online<small>HỌC TẬP & ĐÁNH GIÁ</small></span></a>
+    <div class="sidebar-label"><%= user.role === 'admin' ? 'KHÔNG GIAN QUẢN TRỊ' : 'KHÔNG GIAN HỌC TẬP' %></div>
+    <nav aria-label="Điều hướng chính">
+    <% const links = user.role === 'admin' ? [['/admin','Tổng quan','◫'],['/admin/students','Sinh viên','♙'],['/admin/questions','Ngân hàng câu hỏi','≡'],['/admin/exams','Đề thi','▤'],['/admin/results','Kết quả & thống kê','▥']] : [['/exams','Khám phá đề thi','▤'],['/history','Lịch sử làm bài','◷']]; %>
+    <% for (const [href,label,icon] of links) { const active = href === '/admin' ? path === href : path.startsWith(href); %>
+      <a href="<%= href %>" class="nav-item <%= active ? 'active' : '' %>" <%- active ? 'aria-current="page"' : '' %>><span class="nav-symbol" aria-hidden="true"><%= icon %></span><%= label %></a>
+    <% } %>
+    </nav>
+    <div class="sidebar-bottom"><div class="course-note"><span class="tiny-label">HỌC PHẦN</span><p>Triển khai và Quản trị<br>Hệ thống Phần mềm</p></div><span class="version">Quiz Online · v1.0</span></div>
+  </aside>
+  <div class="page-shell">
+    <header class="topbar">
+      <button class="mobile-menu btn btn-light" type="button" aria-controls="sidebar" aria-expanded="false" aria-label="Mở trình đơn">☰</button>
+      <div class="breadcrumb-label">Quiz Online <span>/</span> <%= user.role === 'admin' ? 'Quản trị' : 'Sinh viên' %></div>
+      <div class="account"><span class="avatar"><%= user.name.slice(0,1).toUpperCase() %></span><span class="account-name"><strong><%= user.name %></strong><small><%= user.role === 'admin' ? 'Quản trị viên' : 'Sinh viên' %></small></span><form method="post" action="/logout"><input type="hidden" name="_csrf" value="<%= csrfToken %>"><button class="btn btn-sm btn-outline-secondary" type="submit">Đăng xuất</button></form></div>
+    </header>
+    <main id="main-content" class="main-content">
+<% } else { %><main id="main-content"><% } %>
+<% if (flash) { %><div class="alert alert-<%= flash.type === 'success' ? 'success' : 'danger' %>" role="status"><%= flash.message %></div><% } %>
