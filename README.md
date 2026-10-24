@@ -208,3 +208,26 @@ Nginx Exporter và MySQL Exporter.
 
 Hướng dẫn triển khai:
 [Monitoring](docs/MONITORING.md)
+
+## Logging và Hardening
+
+Hệ thống tích hợp Loki, Promtail và Grafana
+để thu thập và truy vấn log tập trung.
+
+Hướng dẫn:
+[Logging & Hardening](docs/LOGGING-HARDENING.md)
+
+Khởi động đầy đủ:
+
+```powershell
+docker compose -f compose.yaml -f compose.monitoring.yaml -f compose.logging.yaml up -d --build
+
+
+Lưu README.
+
+## 3. Kiểm tra trước khi tạo Commit 3
+
+Chạy lần lượt:
+
+```powershell
+docker compose -f compose.yaml -f compose.monitoring.yaml -f compose.logging.yaml config --quiet

@@ -1,0 +1,50 @@
+
+services:
+  loki:
+    image: grafana/loki:3.7.0
+    restart: unless-stopped
+    mem_limit: 512m
+    cpus: 0.5
+
+    ports:
+      - "127.0.0.1:3100:3100"
+
+    volumes:
+      - ./deploy/loki/loki.yml:/etc/loki/loki.yml:ro
+      - loki_data:/tmp/loki
+
+    command:
+      - "-config.file=/etc/loki/loki.yml"
+
+    networks:
+      - frontend
+
+    security_opt:
+      - no-new-privileges:true
+
+  promtail:
+    image: grafana/promtail:3.6.11
+    restart: unless-stopped
+    mem_limit: 128m
+    cpus: 0.25
+
+    volumes:
+      - ./deploy/promtail/promtail.yml:/etc/promtail/promtail.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - promtail_positions:/var/lib/promtail
+
+    command:
+      - "-config.file=/etc/promtail/promtail.yml"
+
+    networks:
+      - frontend
+
+    depends_on:
+      - loki
+
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  loki_data:
+  promtail_positions:
