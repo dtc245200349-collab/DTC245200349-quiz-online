@@ -200,3 +200,11 @@ Danh sách file nguồn/cấu hình/tài liệu: [docs/FILES.md](docs/FILES.md).
 Git đã khởi tạo tại chỗ, nhánh dự kiến `main`; chưa commit, chưa gắn remote. Tên repo đề xuất `DTC245200349-quiz-online`. Trước mỗi commit: kiểm tra `git status`, chạy `node scripts/check-secrets.js`, kiểm tra bằng chứng, rồi xin phép người dùng. Ba commit phải phản ánh ba giai đoạn thực hiện thật theo [kế hoạch](docs/IMPLEMENTATION-PLAN.md), không tạo sẵn lịch sử giả.
 
 Prometheus, Grafana, Loki và Promtail chưa được triển khai ở mốc 1. Lệnh kiểm chứng targets/datasource/LogQL và dashboard provisioning sẽ được thêm ở mốc tương ứng sau khi có hệ thống thật. Khung [báo cáo cuối kỳ](reports/README.md) liệt kê nội dung cần hoàn thiện, chưa phải báo cáo 10 trang đã hoàn tất.
+
+## Giám sát hệ thống
+
+Hệ thống sử dụng Prometheus, Grafana, cAdvisor,
+Nginx Exporter và MySQL Exporter.
+
+Hướng dẫn triển khai:
+[Monitoring](docs/MONITORING.md)
